@@ -79,7 +79,7 @@ final class MultiScrollViewController: UIViewController {
     if gestureRecognizer.state == .began || gestureRecognizer.state == .changed {
       let previousScale = contentWidthConstraint.multiplier
       let scale = previousScale * gestureRecognizer.scale
-      zoomContent(to: scale, with: gestureRecognizer)
+      zoomContent(to: scale, duration: 0.0, with: gestureRecognizer)
     }
 
     // Reset scale to avoid duplicate scaling.
@@ -90,10 +90,10 @@ final class MultiScrollViewController: UIViewController {
   @objc
   private func didDoubleTapContentView(_ gestureRecognizer: UIGestureRecognizer) {
     let scale = isContentZooming ? 1.0 : zoomScaleWhenDoubleTapped
-    zoomContent(to: scale, with: gestureRecognizer)
+    zoomContent(to: scale, duration: 0.2, with: gestureRecognizer)
   }
 
-  private func zoomContent(to scale: CGFloat, with gestureRecognizer: UIGestureRecognizer) {
+  private func zoomContent(to scale: CGFloat, duration: TimeInterval, with gestureRecognizer: UIGestureRecognizer) {
     let centerPointOfScrollView = gestureRecognizer.location(in: horizontalScrollView)
     let centerPointOfScreen = gestureRecognizer.location(in: view)
 
@@ -110,27 +110,30 @@ final class MultiScrollViewController: UIViewController {
       multiplier: actualMultiplier
     )
     contentWidthConstraint.isActive = true
-    verticalScrollView.layoutIfNeeded()
 
-    let actualScale = actualMultiplier / previousMultiplier
-    let minimumPosition = CGPoint(x: -horizontalScrollView.safeAreaInsets.left,
-                                  y: -verticalScrollView.safeAreaInsets.top)
-    let maximumPosition = CGPoint(x: horizontalScrollView.contentSize.width + horizontalScrollView.safeAreaInsets.right,
-                                  y: verticalScrollView.contentSize.height + verticalScrollView.safeAreaInsets.bottom)
-    let minimumOffset = minimumPosition
-    let maximumOffset = CGPoint(x: maximumPosition.x - verticalScrollView.frame.width,
-                                y: maximumPosition.y - verticalScrollView.frame.height)
+    UIView.animate(withDuration: duration, animations: {
+      self.verticalScrollView.layoutIfNeeded()
 
-    // Change the Offset of ScrollView to fix the display position of the center point.
-    let idealOffset = CGPoint(x: centerPointOfScrollView.x * actualScale - centerPointOfScreen.x,
-                              y: centerPointOfScrollView.y * actualScale - centerPointOfScreen.y)
+      let actualScale = actualMultiplier / previousMultiplier
+      let minimumPosition = CGPoint(x: -self.horizontalScrollView.safeAreaInsets.left,
+                                    y: -self.verticalScrollView.safeAreaInsets.top)
+      let maximumPosition = CGPoint(x: self.horizontalScrollView.contentSize.width + self.horizontalScrollView.safeAreaInsets.right,
+                                    y: self.verticalScrollView.contentSize.height + self.verticalScrollView.safeAreaInsets.bottom)
+      let minimumOffset = minimumPosition
+      let maximumOffset = CGPoint(x: maximumPosition.x - self.verticalScrollView.frame.width,
+                                  y: maximumPosition.y - self.verticalScrollView.frame.height)
 
-    let verticalScrollViewOffset = CGPoint(x: .zero,
-                                           y: max(minimumOffset.y, min(maximumOffset.y, idealOffset.y)))
-    let horizontalScrollViewOffset = CGPoint(x: max(minimumOffset.x, min(maximumOffset.x, idealOffset.x)),
-                                             y: .zero)
+      // Change the Offset of ScrollView to fix the display position of the center point.
+      let idealOffset = CGPoint(x: centerPointOfScrollView.x * actualScale - centerPointOfScreen.x,
+                                y: centerPointOfScrollView.y * actualScale - centerPointOfScreen.y)
 
-    verticalScrollView.setContentOffset(verticalScrollViewOffset, animated: false)
-    horizontalScrollView.setContentOffset(horizontalScrollViewOffset, animated: false)
+      let verticalScrollViewOffset = CGPoint(x: .zero,
+                                             y: max(minimumOffset.y, min(maximumOffset.y, idealOffset.y)))
+      let horizontalScrollViewOffset = CGPoint(x: max(minimumOffset.x, min(maximumOffset.x, idealOffset.x)),
+                                               y: .zero)
+
+      self.verticalScrollView.contentOffset = verticalScrollViewOffset
+      self.horizontalScrollView.contentOffset = horizontalScrollViewOffset
+    })
   }
 }
