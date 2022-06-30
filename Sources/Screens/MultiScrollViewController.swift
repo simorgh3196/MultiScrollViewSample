@@ -13,9 +13,10 @@ final class MultiScrollViewController: UIViewController {
   var maximumZoomScale: CGFloat = 3.0
   var zoomScaleWhenDoubleTapped: CGFloat = 2.0
 
-  private let imageItemViews = (1..<20).shuffled().prefix(10).map {
+  private let imageItemViews = (0..<150).map { _ in
     let imageRatio = 750.0 / 1899.0
-    let imageView = UIImageView(image: UIImage(named: "Image\($0)")!)
+    let index = Array(1..<20).randomElement()!
+    let imageView = UIImageView(image: UIImage(named: "Image\(index)")!)
     imageView.translatesAutoresizingMaskIntoConstraints = false
     imageView.widthAnchor.constraint(equalTo: imageView.heightAnchor, multiplier: imageRatio).isActive = true
     return imageView
