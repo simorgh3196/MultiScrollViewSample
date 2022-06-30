@@ -79,7 +79,7 @@ final class MultiScrollViewController: UIViewController {
     if gestureRecognizer.state == .began || gestureRecognizer.state == .changed {
       let previousScale = contentWidthConstraint.multiplier
       let scale = previousScale * gestureRecognizer.scale
-      zoomContent(to: scale, duration: 0.0, with: gestureRecognizer)
+      zoomContent(to: scale, with: gestureRecognizer, duration: 0.0)
     }
 
     // Reset scale to avoid duplicate scaling.
@@ -90,10 +90,10 @@ final class MultiScrollViewController: UIViewController {
   @objc
   private func didDoubleTapContentView(_ gestureRecognizer: UIGestureRecognizer) {
     let scale = isContentZooming ? 1.0 : zoomScaleWhenDoubleTapped
-    zoomContent(to: scale, duration: 0.2, with: gestureRecognizer)
+    zoomContent(to: scale, with: gestureRecognizer, duration: 0.2)
   }
 
-  private func zoomContent(to scale: CGFloat, duration: TimeInterval, with gestureRecognizer: UIGestureRecognizer) {
+  private func zoomContent(to scale: CGFloat, with gestureRecognizer: UIGestureRecognizer, duration: TimeInterval) {
     let centerPointOfScrollView = gestureRecognizer.location(in: horizontalScrollView)
     let centerPointOfScreen = gestureRecognizer.location(in: view)
 
